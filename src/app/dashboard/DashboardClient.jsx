@@ -17,10 +17,12 @@ const INR = new Intl.NumberFormat('en-IN', {
 });
 
 export default function DashboardClient({ userName, quote, stats }) {
-  // Derive the greeting based on local time. We use suppressHydrationWarning
-  // on the element to avoid React complaining about the server/client mismatch.
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening';
+  const [greeting, setGreeting] = useState('');
+
+  useEffect(() => {
+    const hour = new Date().getHours();
+    setGreeting(hour < 12 ? 'morning' : hour < 18 ? 'afternoon' : 'evening');
+  }, []);
 
   const features = [
     {
@@ -69,8 +71,8 @@ export default function DashboardClient({ userName, quote, stats }) {
       <section className='spx-hero'>
         <div className='row align-items-center g-3'>
           <div className='col-12 col-md-7'>
-            <h1 className='spx-hero-greeting' suppressHydrationWarning>
-              Good {greeting}
+            <h1 className='spx-hero-greeting'>
+              {greeting ? `Good ${greeting}` : 'Welcome'}
               {userName ? `, ${userName}` : ''}
             </h1>
             <p className='spx-hero-sub'>

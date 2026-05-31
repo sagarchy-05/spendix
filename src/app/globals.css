@@ -1,0 +1,796 @@
+@import 'bootstrap/dist/css/bootstrap.min.css';
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+@import 'react-toastify/dist/ReactToastify.css';
+
+/* ──────────────────────────────────────────────────────────────────────
+   Dark palette — Bootstrap 5.3 CSS variable overrides.
+   Tuned to be easy on the eyes (not pure black; slight blue tint) with
+   one vivid blue accent for primary actions.
+   ────────────────────────────────────────────────────────────────────── */
+[data-bs-theme='dark'] {
+  --bs-body-bg: #0d1117;
+  --bs-body-color: #e6edf3;
+  --bs-emphasis-color: #ffffff;
+  --bs-secondary-bg: #161b22;
+  --bs-tertiary-bg: #1c2128;
+  --bs-secondary-color: #9ba8b6;
+  --bs-tertiary-color: #6e7681;
+  --bs-border-color: #30363d;
+  --bs-border-color-translucent: rgba(255, 255, 255, 0.08);
+
+  --bs-card-bg: #161b22;
+  --bs-card-border-color: #30363d;
+  --bs-card-color: #e6edf3;
+
+  --bs-modal-bg: #1c2128;
+  --bs-modal-color: #e6edf3;
+  --bs-modal-border-color: #30363d;
+
+  --bs-primary: #4f8cff;
+  --bs-primary-rgb: 79, 140, 255;
+  --bs-link-color: #79b8ff;
+  --bs-link-hover-color: #a3c7ff;
+
+  --bs-table-bg: transparent;
+  --bs-table-color: #e6edf3;
+  --bs-table-striped-bg: rgba(255, 255, 255, 0.03);
+  --bs-table-hover-bg: rgba(255, 255, 255, 0.06);
+  --bs-table-border-color: #30363d;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   Surfaces — cards, modals, shadows
+   ────────────────────────────────────────────────────────────────────── */
+.card {
+  background-color: var(--bs-card-bg);
+  border: 1px solid var(--bs-card-border-color);
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.shadow-sm {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+}
+
+.modal-content {
+  background-color: var(--bs-modal-bg);
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.875rem;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+}
+.modal-header,
+.modal-footer {
+  border-color: var(--bs-border-color);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   Forms — inputs sit on the page background, focus ring tinted blue
+   ────────────────────────────────────────────────────────────────────── */
+.form-control,
+.form-select {
+  background-color: #0d1117;
+  color: var(--bs-body-color);
+  border-color: var(--bs-border-color);
+}
+.form-control:focus,
+.form-select:focus {
+  background-color: #0d1117;
+  color: var(--bs-body-color);
+  border-color: var(--bs-primary);
+  box-shadow: 0 0 0 0.2rem rgba(79, 140, 255, 0.22);
+}
+.form-control::placeholder {
+  color: #6e7681;
+}
+.form-control.is-valid,
+.was-validated .form-control:valid {
+  border-color: #3fb950;
+}
+.form-control.is-invalid,
+.was-validated .form-control:invalid {
+  border-color: #ff7b72;
+}
+
+/* Native date/month picker icons — invert so they're visible on dark */
+input[type='date']::-webkit-calendar-picker-indicator,
+input[type='month']::-webkit-calendar-picker-indicator,
+input[type='time']::-webkit-calendar-picker-indicator {
+  filter: invert(0.75);
+  cursor: pointer;
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   Navbar — dark surface, subtle bottom border, brand pop
+   ────────────────────────────────────────────────────────────────────── */
+.navbar.spx-navbar {
+  background-color: #11161f !important;
+  border-bottom: 1px solid var(--bs-border-color);
+}
+.navbar.spx-navbar .navbar-brand {
+  color: #e6edf3 !important;
+  font-size: 1.1rem;
+}
+.navbar.spx-navbar .nav-link {
+  color: #c9d1d9 !important;
+  position: relative;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+.navbar.spx-navbar .nav-link:hover {
+  color: #ffffff !important;
+}
+.navbar.spx-navbar .nav-link.active {
+  color: #79b8ff !important;
+}
+@media (min-width: 992px) {
+  .navbar.spx-navbar .nav-link.active::after {
+    content: '';
+    position: absolute;
+    left: 0.5rem;
+    right: 0.5rem;
+    bottom: 0;
+    height: 2px;
+    background: #4f8cff;
+    border-radius: 1px;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   Tables — header in a darker tinted surface, hover row subtle.
+   Bootstrap drives table cell colors via CSS variables set on the
+   .table-* row/section classes. Override those at the variable level
+   so it works regardless of where `table-light` lands in the cascade.
+   ────────────────────────────────────────────────────────────────────── */
+.table {
+  color: var(--bs-table-color);
+}
+.table > :not(caption) > * > * {
+  background-color: var(--bs-table-bg);
+  color: var(--bs-table-color);
+}
+
+/* The thead carries class="table-light" in this app — flip its variables
+   so dark mode actually uses a *dark* tinted surface with bright text. */
+[data-bs-theme='dark'] .table-light {
+  --bs-table-color: #e6edf3;
+  --bs-table-bg: #1c2128;
+  --bs-table-border-color: #30363d;
+  --bs-table-striped-bg: #1c2128;
+  --bs-table-striped-color: #e6edf3;
+  --bs-table-active-bg: #1c2128;
+  --bs-table-active-color: #e6edf3;
+  --bs-table-hover-bg: #1c2128;
+  --bs-table-hover-color: #e6edf3;
+}
+
+/* Belt-and-suspenders: also style the th directly so any other styling
+   pipeline (third-party, future Bootstrap version) still picks this up. */
+[data-bs-theme='dark'] .table > thead th,
+[data-bs-theme='dark'] .table-light th {
+  background-color: #1c2128 !important;
+  color: #e6edf3 !important;
+  border-color: #30363d !important;
+  font-weight: 600;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding-top: 0.85rem;
+  padding-bottom: 0.85rem;
+}
+.table-hover > tbody > tr:hover > * {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+}
+/* Bootstrap's default .table-danger sets --bs-table-color to a dark red
+   meant for light mode. In dark mode that gives near-invisible cell text.
+   Flip the variables so cells inside an over-budget row use a clean
+   near-white color (the `text-danger`-classed cells inside it still get
+   their warm red treatment via the more specific rule above). */
+[data-bs-theme='dark'] .table-danger,
+[data-bs-theme='dark'] tr.table-danger {
+  --bs-table-color: #f5f8fb;
+  --bs-table-bg: rgba(248, 81, 73, 0.08);
+  --bs-table-border-color: rgba(248, 81, 73, 0.22);
+  --bs-table-striped-bg: rgba(248, 81, 73, 0.1);
+  --bs-table-striped-color: #f5f8fb;
+  --bs-table-active-bg: rgba(248, 81, 73, 0.13);
+  --bs-table-active-color: #ffffff;
+  --bs-table-hover-bg: rgba(248, 81, 73, 0.13);
+  --bs-table-hover-color: #ffffff;
+}
+[data-bs-theme='dark'] .table-danger > th,
+[data-bs-theme='dark'] .table-danger > td {
+  background-color: var(--bs-table-bg) !important;
+  color: var(--bs-table-color) !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   Buttons — bigger touch targets on mobile, refined dark variants
+   ────────────────────────────────────────────────────────────────────── */
+.btn {
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  border-radius: 0.5rem;
+}
+
+/* Bootstrap zeros out pointer-events on disabled buttons, which means
+   browsers can't detect hover to swap the cursor. Restore pointer events
+   on disabled buttons (the `disabled` HTML attribute still blocks clicks)
+   and explicitly show the not-allowed cursor. */
+.btn:disabled,
+.btn.disabled {
+  cursor: not-allowed !important;
+  pointer-events: auto;
+}
+.btn-primary {
+  background-color: #2f7af0;
+  border-color: #2f7af0;
+  color: #ffffff;
+}
+.btn-primary:hover,
+.btn-primary:focus-visible {
+  background-color: #4f8cff;
+  border-color: #4f8cff;
+}
+.btn-success {
+  background-color: #2ea043;
+  border-color: #2ea043;
+  color: #ffffff;
+}
+.btn-success:hover,
+.btn-success:focus-visible {
+  background-color: #3fb950;
+  border-color: #3fb950;
+}
+.btn-danger {
+  background-color: #da3633;
+  border-color: #da3633;
+}
+.btn-danger:hover,
+.btn-danger:focus-visible {
+  background-color: #f85149;
+  border-color: #f85149;
+}
+.btn-outline-primary {
+  color: #79b8ff;
+  border-color: #30363d;
+}
+.btn-outline-primary:hover {
+  background-color: rgba(79, 140, 255, 0.12);
+  border-color: #4f8cff;
+  color: #a3c7ff;
+}
+.btn-outline-danger {
+  color: #ff7b72;
+  border-color: #30363d;
+}
+.btn-outline-danger:hover {
+  background-color: rgba(248, 81, 73, 0.12);
+  border-color: #f85149;
+  color: #ff9b95;
+}
+.btn-outline-secondary {
+  color: #c9d1d9;
+  border-color: #30363d;
+}
+.btn-outline-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.04);
+  border-color: #424a55;
+  color: #ffffff;
+}
+.btn-outline-warning {
+  color: #e3b341;
+  border-color: #30363d;
+}
+.btn-outline-warning:hover {
+  background-color: rgba(227, 179, 65, 0.12);
+  border-color: #e3b341;
+  color: #f3c75b;
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   Alerts (banners) — tinted, low-contrast surfaces
+   ────────────────────────────────────────────────────────────────────── */
+.alert {
+  border-radius: 0.625rem;
+}
+.alert-success {
+  background-color: rgba(63, 185, 80, 0.1);
+  color: #6dde87;
+  border-color: rgba(63, 185, 80, 0.25);
+}
+.alert-danger {
+  background-color: rgba(248, 81, 73, 0.1);
+  color: #ff9b95;
+  border-color: rgba(248, 81, 73, 0.28);
+}
+.alert-info {
+  background-color: rgba(79, 140, 255, 0.1);
+  color: #9cc5ff;
+  border-color: rgba(79, 140, 255, 0.28);
+}
+.alert-warning {
+  background-color: rgba(227, 179, 65, 0.1);
+  color: #f3c75b;
+  border-color: rgba(227, 179, 65, 0.28);
+}
+.alert-secondary {
+  background-color: rgba(255, 255, 255, 0.04);
+  color: #c9d1d9;
+  border-color: var(--bs-border-color);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   Badges — pill style, more muted by default
+   ────────────────────────────────────────────────────────────────────── */
+.badge.bg-light {
+  background-color: #21262d !important;
+  color: #d4dae0 !important;
+}
+.badge.bg-warning {
+  background-color: rgba(227, 179, 65, 0.2) !important;
+  color: #f5d480 !important;
+}
+.badge.bg-danger {
+  background-color: rgba(248, 81, 73, 0.32) !important;
+  color: #ffeae6 !important;
+  font-weight: 600;
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   Tabs — borderless underline style
+   ────────────────────────────────────────────────────────────────────── */
+.nav-tabs {
+  border-bottom-color: var(--bs-border-color);
+}
+.nav-tabs .nav-link {
+  color: #9ba8b6;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  padding: 0.625rem 1rem;
+}
+.nav-tabs .nav-link:hover {
+  color: #ffffff;
+  border-color: transparent;
+  background: transparent;
+}
+.nav-tabs .nav-link.active {
+  background: transparent;
+  color: #79b8ff;
+  border-bottom-color: #4f8cff;
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   Progress bar — slightly darker track
+   ────────────────────────────────────────────────────────────────────── */
+.progress {
+  background-color: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   react-select — covers both classNamePrefixes used in the app
+   ('Select' in TransactionModal, 'react-select' in the filter dropdown)
+   ────────────────────────────────────────────────────────────────────── */
+.Select__control,
+.react-select__control {
+  background-color: #0d1117 !important;
+  border-color: var(--bs-border-color) !important;
+  color: var(--bs-body-color) !important;
+  min-height: 38px;
+  box-shadow: none !important;
+}
+.Select__control--is-focused,
+.react-select__control--is-focused {
+  border-color: var(--bs-primary) !important;
+  box-shadow: 0 0 0 0.2rem rgba(79, 140, 255, 0.22) !important;
+}
+.Select__menu,
+.react-select__menu {
+  background-color: #1c2128 !important;
+  border: 1px solid var(--bs-border-color) !important;
+  color: var(--bs-body-color) !important;
+  margin-top: 4px !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45) !important;
+}
+.Select__option,
+.react-select__option {
+  background-color: transparent !important;
+  color: var(--bs-body-color) !important;
+  cursor: pointer;
+}
+.Select__option:hover,
+.react-select__option:hover,
+.Select__option--is-focused,
+.react-select__option--is-focused {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+.Select__option--is-selected,
+.react-select__option--is-selected {
+  background-color: rgba(79, 140, 255, 0.22) !important;
+  color: #ffffff !important;
+}
+.Select__single-value,
+.react-select__single-value,
+.Select__input-container,
+.react-select__input-container,
+.Select__input,
+.react-select__input {
+  color: var(--bs-body-color) !important;
+}
+.Select__placeholder,
+.react-select__placeholder {
+  color: #6e7681 !important;
+}
+.Select__indicator-separator,
+.react-select__indicator-separator {
+  background-color: var(--bs-border-color) !important;
+}
+.Select__indicator,
+.react-select__indicator {
+  color: #8b949e !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   Toasts (react-toastify) — pick up the dark theme via theme="dark" prop;
+   this just refines the border + radius.
+   ────────────────────────────────────────────────────────────────────── */
+.Toastify__toast {
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.625rem;
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   Text colors — punch up the danger/warning shades for readability
+   on the dark surfaces. Bootstrap's defaults are too muddy.
+   ────────────────────────────────────────────────────────────────────── */
+[data-bs-theme='dark'] .text-danger {
+  color: #ffe5e2 !important;
+}
+[data-bs-theme='dark'] .text-warning {
+  color: #f3c75b !important;
+}
+[data-bs-theme='dark'] .text-success {
+  color: #6dde87 !important;
+}
+[data-bs-theme='dark'] .text-info {
+  color: #9cc5ff !important;
+}
+[data-bs-theme='dark'] .text-muted {
+  color: #8b949e !important;
+}
+
+/* Alert body text — even higher contrast than text-*, since the alert
+   background already carries the color cue. */
+.alert-danger {
+  color: #ffcbc6;
+}
+.alert-success {
+  color: #94e6a4;
+}
+.alert-info {
+  color: #b0d2ff;
+}
+.alert-warning {
+  color: #f5d480;
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   Icon buttons — replaces the old btn-sm btn-outline-* icon-only pattern.
+   Solid filled square (36×36 desktop, 40×40 mobile), subtle hover that
+   matches the action color. Used for edit/delete in tables.
+   ────────────────────────────────────────────────────────────────────── */
+.spx-icon-btn {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--bs-border-color);
+  color: #c9d1d9;
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.spx-icon-btn:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: #424a55;
+  color: #ffffff;
+}
+.spx-icon-btn:focus-visible {
+  outline: 2px solid rgba(79, 140, 255, 0.5);
+  outline-offset: 2px;
+}
+.spx-icon-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.spx-icon-btn--edit:hover:not(:disabled) {
+  background-color: rgba(79, 140, 255, 0.16);
+  border-color: rgba(79, 140, 255, 0.5);
+  color: #a3c7ff;
+}
+.spx-icon-btn--delete:hover:not(:disabled) {
+  background-color: rgba(248, 81, 73, 0.16);
+  border-color: rgba(248, 81, 73, 0.5);
+  color: #ffb3ad;
+}
+
+@media (max-width: 768px) {
+  .spx-icon-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   Dashboard — hero greeting (gradient text), quote treatment, stat
+   tiles, and feature cards with accent-colored icon plates.
+   ────────────────────────────────────────────────────────────────────── */
+.spx-hero {
+  padding: 0;
+}
+.spx-hero-greeting {
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, #ffffff 0%, #79b8ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.15;
+}
+.spx-hero-sub {
+  color: #9ba8b6;
+  font-size: 1.25rem;
+  margin: 0;
+}
+@media (max-width: 768px) {
+  .spx-hero-greeting {
+    font-size: 2.2rem;
+  }
+  .spx-hero-sub {
+    font-size: 1.05rem;
+  }
+}
+
+.spx-quote {
+  position: relative;
+  padding: 0.75rem 0 0.75rem 1.5rem;
+  margin: 0;
+  font-style: italic;
+  color: #b8c2cd;
+  border-left: 4px solid rgba(79, 140, 255, 0.45);
+  font-size: 1.05rem;
+  line-height: 1.6;
+  max-width: 500px;
+}
+
+.spx-stat {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 1.75rem 1.5rem;
+  background-color: rgba(22, 27, 34, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 1rem;
+  height: 100%;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.spx-stat:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+.spx-stat-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #8b949e;
+  margin-bottom: 0.5rem;
+}
+.spx-stat-value {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.1;
+}
+.spx-stat-meta {
+  font-size: 0.78rem;
+  color: #8b949e;
+  margin-top: 0.25rem;
+}
+.spx-stat-meta.is-danger {
+  color: #ffb3ad;
+}
+.spx-stat-meta.is-success {
+  color: #6dde87;
+}
+
+.spx-feature {
+  display: flex;
+  flex-direction: column;
+  padding: 1.75rem 1.5rem;
+  height: 100%;
+  background-color: rgba(22, 27, 34, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 1rem;
+  color: var(--bs-body-color);
+  text-decoration: none;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+  position: relative;
+}
+.spx-feature:hover {
+  transform: translateY(-4px);
+  border-color: rgba(79, 140, 255, 0.4);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  color: var(--bs-body-color);
+}
+.spx-feature-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 0.65rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  margin-bottom: 1.25rem;
+}
+.spx-feature-icon--primary {
+  background: rgba(79, 140, 255, 0.16);
+  color: #79b8ff;
+}
+.spx-feature-icon--success {
+  background: rgba(63, 185, 80, 0.16);
+  color: #6dde87;
+}
+.spx-feature-icon--info {
+  background: rgba(88, 166, 255, 0.16);
+  color: #9cc5ff;
+}
+.spx-feature-icon--warning {
+  background: rgba(227, 179, 65, 0.16);
+  color: #f3c75b;
+}
+.spx-feature-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 0.4rem;
+}
+.spx-feature-desc {
+  font-size: 0.9rem;
+  color: #9ba8b6;
+  margin-bottom: 1.25rem;
+  line-height: 1.5;
+}
+.spx-feature-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 0.85rem;
+  color: #9ba8b6;
+}
+.spx-feature-meta .arrow {
+  color: #4f8cff;
+  transition: transform 0.18s ease;
+}
+.spx-feature:hover .spx-feature-meta .arrow {
+  transform: translateX(3px);
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   Helpers
+   ────────────────────────────────────────────────────────────────────── */
+.hover-shadow {
+  transition: transform 0.2s ease, box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+.hover-shadow:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.45);
+  border-color: rgba(79, 140, 255, 0.5) !important;
+}
+
+.name-hover {
+  transition: color 0.2s ease;
+}
+.name-hover:hover {
+  text-decoration: underline;
+  color: #79b8ff !important;
+}
+
+body.modal-open {
+  overflow: hidden;
+}
+.modal-open {
+  overflow: hidden !important;
+}
+.modal-body {
+  overflow-y: auto;
+  max-height: calc(100vh - 200px);
+}
+.modal-dialog {
+  width: 100%;
+  max-width: 500px;
+  margin: 1rem auto;
+  padding: 0 1rem;
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   Mobile-first refinements
+   ────────────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Headings get smaller on phones */
+  h2.display-5 {
+    font-size: 1.75rem;
+  }
+  h2.fw-bold {
+    font-size: 1.35rem;
+  }
+  /* Forms — slightly tighter input padding */
+  .form-control-lg {
+    font-size: 1rem;
+    padding: 0.625rem 0.875rem;
+  }
+  /* Tables — tighter cells so 5-col tables fit better */
+  .table > :not(caption) > * > * {
+    padding: 0.5rem 0.5rem;
+  }
+  /* Cards more compact */
+  .card {
+    border-radius: 0.625rem;
+  }
+  /* Modals — break out of the centered narrow box */
+  .modal-dialog {
+    margin: 0.5rem;
+    padding: 0;
+  }
+  .modal-content {
+    border-radius: 0.75rem;
+  }
+  /* Container side gutters */
+  .container,
+  .container-fluid {
+    padding-left: 0.875rem;
+    padding-right: 0.875rem;
+  }
+}
+
+/* iPhone notches / Android nav bars */
+@supports (padding: max(0px)) {
+  body {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Reduce flash-of-unstyled-content on first load */
+html {
+  background-color: #0d1117;
+}

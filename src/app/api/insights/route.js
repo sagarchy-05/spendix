@@ -128,9 +128,13 @@ export async function POST(request) {
     .join(', ');
 
   const prompt = `
-Given the following list of recent financial transactions, generate exactly 3 to 5 personalized insights that will help the user save money, spot spending patterns, or improve financial habits.
+Given the following list of recent financial transactions, you MUST generate exactly 3 to 4 distinct personalized insights to help the user save money, spot spending patterns, or improve financial habits.
 
-Respond ONLY with bullet points that start with a dash (-). Do NOT mention or repeat the transactions. Avoid generic tips. Each bullet must be concise and actionable.
+CRITICAL INSTRUCTIONS:
+- Generate exactly 3 to 4 insights. Do not generate just one.
+- Respond ONLY with bullet points that start with a dash (-). 
+- Do NOT mention or repeat the individual transactions. 
+- Avoid generic tips. Each bullet must be highly concise and actionable.
 
 Transactions:
 ${transactionText}
@@ -151,7 +155,7 @@ ${transactionText}
     model: google(modelId),
     system: 'You are a smart and concise personal finance assistant.',
     prompt,
-    maxOutputTokens: 300,
+    maxOutputTokens: 800,
     temperature: 0.7,
     onFinish: async ({ text }) => {
       try {

@@ -7,6 +7,9 @@ import { requireAuth } from '@/lib/requireAuth';
 import { checkRateLimit, refundRateLimit } from '@/lib/rateLimiter';
 import { parseMonth } from '@/lib/monthRange';
 
+export const maxDuration = 60; // Extend Vercel Hobby tier timeout to 60 seconds
+
+
 const google = createGoogleGenerativeAI({
   apiKey: process.env.GEMINI_API_KEY,
 });

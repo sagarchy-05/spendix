@@ -25,6 +25,7 @@
     "jwt-decode": "^4.0.0",
     "mongoose": "^9.6.3",
     "next": "16.2.6",
+    "nextjs-toploader": "^3.9.17",
     "nodemailer": "^8.0.10",
     "react": "19.2.4",
     "react-bootstrap": "^2.10.10",

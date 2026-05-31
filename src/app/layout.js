@@ -1,4 +1,5 @@
 import './globals.css';
+import NextTopLoader from 'nextjs-toploader';
 import AppShell from '@/components/AppShell';
 import { getServerUser } from '@/lib/serverAuth';
 
@@ -23,6 +24,7 @@ export default async function RootLayout({ children }) {
       data-scroll-behavior='smooth'
     >
       <body>
+        <NextTopLoader color='#2f7af0' showSpinner={false} shadow='0 0 10px #2f7af0,0 0 5px #2f7af0' />
         <AppShell initialUser={initialUser}>{children}</AppShell>
       </body>
     </html>

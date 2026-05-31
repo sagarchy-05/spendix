@@ -168,6 +168,42 @@ export default function BudgetsClient({
     }
   };
 
+  const handleMakeDefault = async () => {
+    const ok = await confirm({
+      title: 'Make this your default?',
+      body: `This will overwrite your default template with the current month's limits. Future months will use this template.`,
+      confirmLabel: 'Save as Default',
+      confirmVariant: 'primary',
+    });
+    if (!ok) return;
+
+    setSaving(true);
+    try {
+      await api.put('/budgets/update', {
+        month: 'default',
+        budgets: budgets.map((b) => ({
+          category: b.category,
+          limit: b.limit,
+        })),
+      });
+
+      setAlert({
+        type: 'success',
+        message: 'Current budget saved as the new default template.',
+        visible: true,
+      });
+      refresh();
+    } catch (error) {
+      setAlert({
+        type: 'danger',
+        message: error.response?.data?.message || 'Failed to save as default',
+        visible: true,
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const openAddModal = () => {
     setFormData({ category: '', limit: '' });
     setOriginalCategory(null);
@@ -301,9 +337,20 @@ export default function BudgetsClient({
             />
           )}
         </div>
-        <button className='btn btn-success' onClick={openAddModal}>
-          <i className='bi bi-plus-lg me-2'></i>Add Budget
-        </button>
+        <div className='d-flex gap-2'>
+          {!viewingDefault && budgets.length > 0 && (
+            <button
+              className='btn btn-outline-secondary'
+              onClick={handleMakeDefault}
+              disabled={saving}
+            >
+              <i className='bi bi-box-arrow-in-down me-2'></i>Make Default
+            </button>
+          )}
+          <button className='btn btn-success' onClick={openAddModal}>
+            <i className='bi bi-plus-lg me-2'></i>Add Budget
+          </button>
+        </div>
       </div>
 
       {/* Context banner — explains the current view */}

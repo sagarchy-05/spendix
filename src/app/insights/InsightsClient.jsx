@@ -95,36 +95,37 @@ export default function InsightsClient({ initialInsights }) {
         return;
       }
 
-      // Check whether this is the "no transactions" JSON 200 or a stream.
-      const contentType = res.headers.get('content-type') || '';
-      if (!contentType.includes('text/plain')) {
-        const data = await res.json().catch(() => ({}));
+      const data = await res.json().catch(() => ({}));
+      
+      if (!data.insight) {
         setInsights((prev) => prev.filter((i) => i._id !== tempId));
         if (data.message) setMessage(data.message);
         return;
       }
 
-      // Stream the model tokens into the temp insight's content.
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let accumulated = '';
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        accumulated += decoder.decode(value, { stream: true });
+      const fullText = data.insight.content;
+      let currentIndex = 0;
+      
+      const timer = setInterval(() => {
+        currentIndex++;
+        const currentText = fullText.slice(0, currentIndex);
+        
         setInsights((prev) =>
           prev.map((i) =>
-            i._id === tempId ? { ...i, content: accumulated } : i
+            i._id === tempId ? { ...i, content: currentText } : i
           )
         );
-      }
 
-      setInsights((prev) =>
-        prev.map((i) =>
-          i._id === tempId ? { ...i, streaming: false } : i
-        )
-      );
-      setMessage('New insight generated successfully!');
+        if (currentIndex >= fullText.length) {
+          clearInterval(timer);
+          setInsights((prev) =>
+            prev.map((i) =>
+              i._id === tempId ? { ...i, ...data.insight, streaming: false } : i
+            )
+          );
+          setMessage('New insight generated successfully!');
+        }
+      }, 20);
     } catch (err) {
       console.error('Error generating insight:', err);
       setInsights((prev) => prev.filter((i) => i._id !== tempId));
@@ -250,7 +251,7 @@ export default function InsightsClient({ initialInsights }) {
                     )}
                     {insight.streaming && !insight.content && (
                       <p className='text-muted fst-italic mb-0'>
-                        Asking Gemini for your insight…
+                        Generating insights...
                       </p>
                     )}
                   </div>

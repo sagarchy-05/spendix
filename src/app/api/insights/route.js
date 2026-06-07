@@ -1,5 +1,5 @@
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { streamText } from 'ai';
+import { generateText } from 'ai';
 import { connectDB } from '@/lib/mongoose';
 import Insight from '@/lib/models/Insight';
 import Transaction from '@/lib/models/Transaction';
@@ -8,6 +8,7 @@ import { checkRateLimit, refundRateLimit } from '@/lib/rateLimiter';
 import { parseMonth } from '@/lib/monthRange';
 
 export const maxDuration = 60; // Extend Vercel Hobby tier timeout to 60 seconds
+export const dynamic = 'force-dynamic'; // Prevent Next.js from aggressively caching
 
 
 const google = createGoogleGenerativeAI({
@@ -77,9 +78,9 @@ export async function POST(request) {
   // abuse economically pointless. Captcha is still gating the unauth'd
   // endpoints (signup, login, resend-verification).
 
-  // Load current-month transactions only. Insights are about how the user
-  // is spending right now — historical months are interesting but including
-  // them would dilute the advice with stale patterns.
+  // Load current-month transactions. Insights are ideally about how the user
+  // is spending right now. However, if the current month has too few transactions,
+  // we fall back to a global recent fetch so the AI has enough context.
   const range = parseMonth(undefined); // current UTC month
   let transactions;
   try {
@@ -90,6 +91,14 @@ export async function POST(request) {
     })
       .sort({ date: -1 })
       .limit(100);
+
+    // Smart fallback: If the current month has fewer than 20 transactions,
+    // grab the last 50 transactions overall (across all time).
+    if (!transactions || transactions.length < 20) {
+      transactions = await Transaction.find({ userId: auth.userId })
+        .sort({ date: -1 })
+        .limit(50);
+    }
   } catch (error) {
     console.error('Error loading transactions for insight:', error);
     return Response.json(
@@ -99,7 +108,7 @@ export async function POST(request) {
   }
   if (!transactions || transactions.length === 0) {
     return Response.json({
-      message: `No transactions present in ${range.display} to generate insights on.`,
+      message: 'No transactions present in your account to generate insights on.',
       insights: [],
     });
   }
@@ -151,34 +160,39 @@ ${transactionText}
     );
   }
 
-  // streamText returns a result whose .toTextStreamResponse() pipes the
-  // raw model tokens to the client. onFinish runs after the full text is
-  // accumulated — that's where we parse/validate/persist.
-  const result = streamText({
-    model: google(modelId),
-    system: 'You are a smart and concise personal finance assistant.',
-    prompt,
-    maxOutputTokens: 800,
-    temperature: 0.7,
-    onFinish: async ({ text }) => {
-      try {
-        const { aiInsight, valid } = parseAndValidateInsight(text);
-        if (!valid) return; // don't pollute history with bad output
-        await Insight.create({
-          userId: auth.userId,
-          content: aiInsight,
-        });
-      } catch (err) {
-        console.error('[insight] save failed:', err);
-      }
-    },
-    onError: ({ error }) => {
-      // Stream errored before/during Gemini producing useful content.
-      // Refund the rate slot so the user isn't penalized for our outage.
-      refundRateLimit(auth.userId);
-      console.error('Gemini stream error:', error);
-    },
-  });
+  try {
+    const { text } = await generateText({
+      model: google(modelId),
+      system: 'You are a smart and concise personal finance assistant.',
+      prompt,
+      maxOutputTokens: 800,
+      temperature: 0.7,
+    });
 
-  return result.toTextStreamResponse();
+    const { aiInsight, valid } = parseAndValidateInsight(text);
+    if (!valid) {
+      refundRateLimit(auth.userId);
+      return Response.json(
+        { message: 'Gemini generated invalid output. Please try again.', insights: [] },
+        { status: 500 }
+      );
+    }
+    
+    const newInsight = await Insight.create({
+      userId: auth.userId,
+      content: aiInsight,
+    });
+
+    return Response.json({
+      message: 'Success',
+      insight: newInsight,
+    });
+  } catch (error) {
+    refundRateLimit(auth.userId);
+    console.error('Gemini generation error:', error);
+    return Response.json(
+      { message: 'Failed to generate insight from Gemini.', error: error.message },
+      { status: 500 }
+    );
+  }
 }
